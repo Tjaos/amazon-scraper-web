@@ -1,24 +1,35 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+document.getElementById("searchButton").addEventListener("click", async () => {
+  const keyword = document.getElementById("keyword").value.trim();
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "Loading...";
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+  if (!keyword) {
+    resultsDiv.innerHTML = "<p style='color:red;'>Type a keyword!</p>";
+    return;
+  }
 
-setupCounter(document.querySelector('#counter'))
+  try {
+    const res = await fetch(
+      `http://localhost:3000/api/scrape?keyword=${encodeURIComponent(keyword)}`
+    );
+    const data = await res.json();
+
+    if (res.ok) {
+      resultsDiv.innerHTML = "";
+      data.forEach((product) => {
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `
+          <h3>${product.title}</h3>
+          <p>⭐ ${product.rating} - ${product.reviews} reviews</p>
+          <img src="${product.image}" alt="Product image" />
+        `;
+        resultsDiv.appendChild(div);
+      });
+    } else {
+      resultsDiv.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+    }
+  } catch (error) {
+    resultsDiv.innerHTML = "<p style='color:red;'>Conection server error.</p>";
+  }
+});

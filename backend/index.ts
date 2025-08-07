@@ -6,9 +6,11 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors()); // Enable CORS for all routes
-//scraping endpoint
-app.get("api/scrape", async (req, res) => {
+
+// scraping endpoint
+app.get("/api/scrape", async (req, res) => {
   const keyword = req.query.keyword as string;
+
   if (!keyword) {
     return res.status(400).json({ error: "Keyword is required" });
   }
